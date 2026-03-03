@@ -1,11 +1,13 @@
 name: Render Images
 
 on:
-  repository_dispatch:
-    types: [render-image]
+  issue_comment:
+    types: [created]
 
 jobs:
   render:
+    # Only run if comment starts with LUMA_IMG:
+    if: startsWith(github.event.comment.body, 'LUMA_IMG:')
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -20,9 +22,26 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Parse text with Groq AI + Generate SVGs
+      - name: Parse comment payload
+        id: payload
+        run: |
+          # Comment format: LUMA_IMG:{"jobId":"...","text":"...","deviceId":"..."}
+          COMMENT='${{ github.event.comment.body }}'
+          JSON="${COMMENT#LUMA_IMG:}"
+          echo "json=$JSON" >> $GITHUB_OUTPUT
+          JOB_ID=$(echo "$JSON" | node -e "const d=require('fs').readFileSync('/dev/stdin','utf8');console.log(JSON.parse(d).jobId||'')")
+          TEXT=$(echo "$JSON" | node -e "const d=require('fs').readFileSync('/dev/stdin','utf8');console.log(JSON.parse(d).text||'')")
+          DEVICE_ID=$(echo "$JSON" | node -e "const d=require('fs').readFileSync('/dev/stdin','utf8');console.log(JSON.parse(d).deviceId||'')")
+          echo "jobId=$JOB_ID" >> $GITHUB_OUTPUT
+          echo "text=$TEXT" >> $GITHUB_OUTPUT
+          echo "deviceId=$DEVICE_ID" >> $GITHUB_OUTPUT
+
+      - name: Generate SVGs with Groq AI
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          JOB_ID: ${{ steps.payload.outputs.jobId }}
+          INPUT_TEXT: ${{ steps.payload.outputs.text }}
+          DEVICE_ID: ${{ steps.payload.outputs.deviceId }}
         run: |
           cat << 'SCRIPT' > run.mjs
           import fs from 'fs';
@@ -31,7 +50,6 @@ jobs:
           const text     = process.env.INPUT_TEXT;
           const deviceId = process.env.DEVICE_ID;
 
-          // ── GROQ AI: parse text into posts ──────────────────────────
           const prompt = `Return ONLY valid JSON. No explanation. No markdown. No code fences.
 
           Task: Split the input into separate posts and structure as JSON.
@@ -89,8 +107,7 @@ jobs:
 
           if (!posts.length) { console.error('No posts parsed'); process.exit(1); }
 
-          // ── Post-process ──────────────────────────────────────────────
-          const ZODIAC_RE = /(白羊座|金牛座|雙子座|巨蟹座|獅子座|處女座|天秤座|天蝎座|射手座|摩羯座|水瓶座|雙魚座|Aries|Taurus|Gemini|Cancer|Leo|Virgo|Libra|Scorpio|Sagittarius|Capricorn|Aquarius|Pisces)/gi;
+          const ZODIAC_RE = /(Aries|Taurus|Gemini|Cancer|Leo|Virgo|Libra|Scorpio|Sagittarius|Capricorn|Aquarius|Pisces)/gi;
           const bold = t => t ? t.replace(ZODIAC_RE, '**$1**') : t;
           const clean = t => (t||'').replace(/\*\*/g,'').trim();
           const stripNum = t => (t||'').replace(/^\s*(?:post\s*)?\d+\s*[.:\)]\s*/i,'').replace(/^\s*\(\d+\)\s*/,'').trim();
@@ -100,44 +117,17 @@ jobs:
             content: (p.content||[]).map(l => l ? bold(l) : l)
           }));
 
-          // ── SVG Generator ─────────────────────────────────────────────
           const EMOJI_FONT = `'Apple Color Emoji','Noto Color Emoji','Segoe UI Emoji'`;
           const BASE_FONT  = `ui-sans-serif,system-ui,-apple-system,sans-serif,${EMOJI_FONT}`;
 
-          function xe(s) {
-            return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-          }
-          function isWide(ch) {
-            const cp = ch.codePointAt(0);
-            return cp>=0x1F000||(cp>=0x4E00&&cp<=0x9FFF)||(cp>=0x3040&&cp<=0x30FF)||(cp>=0xAC00&&cp<=0xD7AF)||(cp>=0x2600&&cp<=0x27FF);
-          }
-          function charLen(str) { let n=0; for(const c of [...(str||'')]) n+=isWide(c)?2:1; return n; }
-          function parseBold(text) {
-            const segs=[],re=/\*\*(.*?)\*\*/g; let last=0,m;
-            while((m=re.exec(text))!==null){if(m.index>last)segs.push({t:text.slice(last,m.index),bold:false});if(m[1])segs.push({t:m[1],bold:true});last=re.lastIndex;}
-            if(last<text.length)segs.push({t:text.slice(last),bold:false});
-            return segs.filter(s=>s.t);
-          }
-          function wrapLatin(text,cpl) {
-            const words=text.split(' '),lines=[];let cur='',curLen=0;
-            for(const w of words){const wl=charLen(clean(w)),sep=cur?1:0;if(curLen+sep+wl>cpl&&cur){lines.push(cur);cur=w;curLen=wl;}else{cur=cur?`${cur} ${w}`:w;curLen+=sep+wl;}}
-            if(cur)lines.push(cur); return lines.length?lines:[''];
-          }
-          function wrapCJK(text,cpl) {
-            const lines=[];let curRaw='',curLen=0,inBold=false;const chars=[...text];let i=0;
-            while(i<chars.length){if(chars[i]==='*'&&chars[i+1]==='*'){curRaw+='**';inBold=!inBold;i+=2;continue;}const ch=chars[i],cl=isWide(ch)?2:1;if(curLen+cl>cpl&&clean(curRaw).length>0){if(inBold)curRaw+='**';lines.push(curRaw);curRaw=inBold?'**'+ch:ch;curLen=cl;}else{curRaw+=ch;curLen+=cl;}i++;}
-            if(clean(curRaw))lines.push(curRaw); return lines.length?lines:[''];
-          }
-          function smartWrap(text,cpl) {
-            if(!text)return[''];const p=clean(text),sp=(p.match(/ /g)||[]).length,wc=[...p].filter(isWide).length;
-            return(wc>p.length*0.3||(wc>2&&sp<2))?wrapCJK(text,cpl):wrapLatin(text,cpl);
-          }
-          function renderLine(px,y,fs,fw,fill,rawText) {
-            const segs=parseBold(rawText),hasBold=segs.some(s=>s.bold);
-            if(!hasBold)return `<text x="${px}" y="${y}" font-family="${BASE_FONT}" font-size="${fs}" font-weight="${fw}" fill="${fill}" xml:space="preserve">${xe(clean(rawText))}</text>`;
-            const spans=segs.map(s=>`<tspan font-weight="${s.bold?900:fw}" fill="${s.bold?'#FFFFFF':fill}">${xe(s.t)}</tspan>`).join('');
-            return `<text x="${px}" y="${y}" font-family="${BASE_FONT}" font-size="${fs}" font-weight="${fw}" fill="${fill}" xml:space="preserve">${spans}</text>`;
-          }
+          function xe(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+          function isWide(ch){const cp=ch.codePointAt(0);return cp>=0x1F000||(cp>=0x4E00&&cp<=0x9FFF)||(cp>=0x3040&&cp<=0x30FF)||(cp>=0xAC00&&cp<=0xD7AF)||(cp>=0x2600&&cp<=0x27FF);}
+          function charLen(str){let n=0;for(const c of [...(str||'')])n+=isWide(c)?2:1;return n;}
+          function parseBold(text){const segs=[],re=/\*\*(.*?)\*\*/g;let last=0,m;while((m=re.exec(text))!==null){if(m.index>last)segs.push({t:text.slice(last,m.index),bold:false});if(m[1])segs.push({t:m[1],bold:true});last=re.lastIndex;}if(last<text.length)segs.push({t:text.slice(last),bold:false});return segs.filter(s=>s.t);}
+          function wrapLatin(text,cpl){const words=text.split(' '),lines=[];let cur='',curLen=0;for(const w of words){const wl=charLen(clean(w)),sep=cur?1:0;if(curLen+sep+wl>cpl&&cur){lines.push(cur);cur=w;curLen=wl;}else{cur=cur?`${cur} ${w}`:w;curLen+=sep+wl;}}if(cur)lines.push(cur);return lines.length?lines:[''];}
+          function wrapCJK(text,cpl){const lines=[];let curRaw='',curLen=0,inBold=false;const chars=[...text];let i=0;while(i<chars.length){if(chars[i]==='*'&&chars[i+1]==='*'){curRaw+='**';inBold=!inBold;i+=2;continue;}const ch=chars[i],cl=isWide(ch)?2:1;if(curLen+cl>cpl&&clean(curRaw).length>0){if(inBold)curRaw+='**';lines.push(curRaw);curRaw=inBold?'**'+ch:ch;curLen=cl;}else{curRaw+=ch;curLen+=cl;}i++;}if(clean(curRaw))lines.push(curRaw);return lines.length?lines:[''];}
+          function smartWrap(text,cpl){if(!text)return[''];const p=clean(text),sp=(p.match(/ /g)||[]).length,wc=[...p].filter(isWide).length;return(wc>p.length*0.3||(wc>2&&sp<2))?wrapCJK(text,cpl):wrapLatin(text,cpl);}
+          function renderLine(px,y,fs,fw,fill,rawText){const segs=parseBold(rawText),hasBold=segs.some(s=>s.bold);if(!hasBold)return `<text x="${px}" y="${y}" font-family="${BASE_FONT}" font-size="${fs}" font-weight="${fw}" fill="${fill}" xml:space="preserve">${xe(clean(rawText))}</text>`;const spans=segs.map(s=>`<tspan font-weight="${s.bold?900:fw}" fill="${s.bold?'#FFFFFF':fill}">${xe(s.t)}</tspan>`).join('');return `<text x="${px}" y="${y}" font-family="${BASE_FONT}" font-size="${fs}" font-weight="${fw}" fill="${fill}" xml:space="preserve">${spans}</text>`;}
 
           function generateSVG(post) {
             const W=1080,H=1920,PX=110,PY=130,CW=W-PX*2,BOTTOM=H-PY;
@@ -164,7 +154,6 @@ jobs:
             return `<?xml version="1.0" encoding="UTF-8"?><svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="bg" x1="0" y1="0" x2="${W}" y2="${H}" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#06020f"/><stop offset="55%" stop-color="#080412"/><stop offset="100%" stop-color="#00091a"/></linearGradient><clipPath id="clip"><rect width="${W}" height="${H}"/></clipPath></defs><rect width="${W}" height="${H}" fill="url(#bg)"/><g clip-path="url(#clip)">${els.join('\n')}</g></svg>`;
           }
 
-          // ── Generate all SVGs ─────────────────────────────────────────
           const results = posts.map((p,i) => ({
             title:   clean(p.title),
             content: p.content,
@@ -172,7 +161,6 @@ jobs:
             index:   i
           }));
 
-          // ── Write status JSON ─────────────────────────────────────────
           const statusDir = 'api/status';
           if (!fs.existsSync(statusDir)) fs.mkdirSync(statusDir, { recursive: true });
 
@@ -190,27 +178,23 @@ jobs:
           fs.writeFileSync(`${statusDir}/${jobId}.json`, JSON.stringify(statusData));
           console.log(`Written ${results.length} posts to api/status/${jobId}.json`);
           SCRIPT
-
-          JOB_ID="${{ github.event.client_payload.jobId }}" \
-          INPUT_TEXT="${{ github.event.client_payload.text }}" \
-          DEVICE_ID="${{ github.event.client_payload.deviceId }}" \
           node run.mjs
 
-      - name: Commit status file to repo
+      - name: Commit status file
         run: |
           git config user.name  "LUMA Bot"
           git config user.email "luma-bot@users.noreply.github.com"
           git add api/status/
-          git diff --staged --quiet || git commit -m "job: ${{ github.event.client_payload.jobId }}"
+          git diff --staged --quiet || git commit -m "job: ${{ steps.payload.outputs.jobId }}"
           git push
 
-      - name: Mark job failed on error
+      - name: Mark failed on error
         if: failure()
         run: |
           mkdir -p api/status
-          echo '{"status":"error","error":"Image generation failed. Check Actions logs.","jobId":"${{ github.event.client_payload.jobId }}","results":[],"done":0,"total":0}' > api/status/${{ github.event.client_payload.jobId }}.json
+          echo "{\"status\":\"error\",\"jobId\":\"${{ steps.payload.outputs.jobId }}\",\"error\":\"Image generation failed.\",\"results\":[],\"done\":0,\"total\":0}" > api/status/${{ steps.payload.outputs.jobId }}.json
           git config user.name  "LUMA Bot"
           git config user.email "luma-bot@users.noreply.github.com"
           git add api/status/
-          git diff --staged --quiet || git commit -m "job-error: ${{ github.event.client_payload.jobId }}"
+          git diff --staged --quiet || git commit -m "job-error: ${{ steps.payload.outputs.jobId }}"
           git push
