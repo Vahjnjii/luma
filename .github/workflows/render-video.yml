@@ -1,11 +1,13 @@
 name: Render Video
 
 on:
-  repository_dispatch:
-    types: [render-video]
+  issue_comment:
+    types: [created]
 
 jobs:
   render:
+    # Only run if comment starts with LUMA_VID:
+    if: startsWith(github.event.comment.body, 'LUMA_VID:')
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -21,6 +23,20 @@ jobs:
           sudo apt-get install -y ffmpeg python3-pip -qq
           pip3 install kaggle --quiet
 
+      - name: Parse comment payload
+        id: payload
+        run: |
+          COMMENT='${{ github.event.comment.body }}'
+          JSON="${COMMENT#LUMA_VID:}"
+          JOB_ID=$(echo "$JSON" | node -e "const d=require('fs').readFileSync('/dev/stdin','utf8');console.log(JSON.parse(d).jobId||'')")
+          TEXT=$(echo "$JSON" | node -e "const d=require('fs').readFileSync('/dev/stdin','utf8');console.log(JSON.parse(d).overlayText||'')")
+          DURATION=$(echo "$JSON" | node -e "const d=require('fs').readFileSync('/dev/stdin','utf8');console.log(JSON.parse(d).duration||30)")
+          DEVICE_ID=$(echo "$JSON" | node -e "const d=require('fs').readFileSync('/dev/stdin','utf8');console.log(JSON.parse(d).deviceId||'')")
+          echo "jobId=$JOB_ID" >> $GITHUB_OUTPUT
+          echo "text=$TEXT" >> $GITHUB_OUTPUT
+          echo "duration=$DURATION" >> $GITHUB_OUTPUT
+          echo "deviceId=$DEVICE_ID" >> $GITHUB_OUTPUT
+
       - name: Download random video from Kaggle
         env:
           KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
@@ -31,23 +47,18 @@ jobs:
           chmod 600 ~/.kaggle/kaggle.json
 
           DATASET="shreevathsbbhh/video-clips"
-          echo "Downloading file list from: $DATASET"
-
           kaggle datasets files $DATASET --csv 2>/dev/null | grep -i "\.mp4" | awk -F',' '{print $1}' > mp4list.txt || true
 
           if [ ! -s mp4list.txt ]; then
-            echo "Downloading full dataset..."
             kaggle datasets download $DATASET --unzip -p ./videos/ -q
             find ./videos -name "*.mp4" > mp4list.txt
           fi
 
           TOTAL=$(wc -l < mp4list.txt | tr -d ' ')
-          echo "Total videos found: $TOTAL"
           if [ "$TOTAL" -eq 0 ]; then echo "No videos found"; exit 1; fi
 
           PICK=$(( (RANDOM % TOTAL) + 1 ))
           CHOSEN=$(sed -n "${PICK}p" mp4list.txt)
-          echo "Chosen: $CHOSEN"
 
           if [ ! -f "./videos/$CHOSEN" ] && [ -n "$CHOSEN" ]; then
             kaggle datasets download $DATASET -f "$CHOSEN" --unzip -p ./videos/ -q || true
@@ -60,72 +71,50 @@ jobs:
           fi
 
           echo "VIDEO_PATH=$FOUND" >> $GITHUB_ENV
-          echo "Using video: $FOUND"
 
       - name: Render video with FFmpeg
         run: |
-          JOB_ID="${{ github.event.client_payload.jobId }}"
-          DURATION="${{ github.event.client_payload.duration }}"
-          OVERLAY_TEXT="${{ github.event.client_payload.overlayText }}"
-          INPUT="$VIDEO_PATH"
-
-          echo "Rendering: duration=${DURATION}s text=${OVERLAY_TEXT}"
-
-          # Escape text for ffmpeg drawtext
+          DURATION="${{ steps.payload.outputs.duration }}"
+          OVERLAY_TEXT="${{ steps.payload.outputs.text }}"
           SAFE_TEXT=$(echo "$OVERLAY_TEXT" | sed "s/'/'\\\\''/g" | sed 's/:/\\:/g' | sed 's/\[/\\[/g' | sed 's/\]/\\]/g')
 
           ffmpeg -y \
-            -stream_loop -1 -i "$INPUT" \
+            -stream_loop -1 -i "$VIDEO_PATH" \
             -vf "setpts=2.0*PTS,
                  scale=1080:1920:force_original_aspect_ratio=increase,
                  crop=1080:1920,
-                 drawtext=text='${SAFE_TEXT}':
-                   fontsize=56:
-                   fontcolor=white:
-                   shadowcolor=black@0.8:
-                   shadowx=3:shadowy=3:
-                   x=(w-text_w)/2:
-                   y=h-220:
-                   line_spacing=14:
-                   borderw=3:
-                   bordercolor=black@0.5" \
+                 drawtext=text='${SAFE_TEXT}':fontsize=56:fontcolor=white:shadowcolor=black@0.8:shadowx=3:shadowy=3:x=(w-text_w)/2:y=h-220:line_spacing=14:borderw=3:bordercolor=black@0.5" \
             -t "$DURATION" \
             -an \
             -c:v libx264 -preset fast -crf 23 \
             -movflags +faststart \
             output.mp4
 
-          echo "Render complete. Size: $(du -sh output.mp4)"
-
       - name: Upload video to GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
-          JOB_ID="${{ github.event.client_payload.jobId }}"
+          JOB_ID="${{ steps.payload.outputs.jobId }}"
           REPO="${{ github.repository }}"
           TAG="video-${JOB_ID}"
           FILENAME="${TAG}.mp4"
 
-          echo "Creating release: $TAG"
           gh release create "$TAG" \
             --repo "$REPO" \
             --title "Video $JOB_ID" \
             --notes "Auto-generated video" \
             --latest=false 2>/dev/null || true
 
-          echo "Uploading video..."
           gh release upload "$TAG" output.mp4#"$FILENAME" --repo "$REPO" --clobber
 
           VIDEO_URL="https://github.com/${REPO}/releases/download/${TAG}/${FILENAME}"
           echo "VIDEO_URL=$VIDEO_URL" >> $GITHUB_ENV
-          echo "Video URL: $VIDEO_URL"
 
       - name: Write status JSON to repo
-        env:
-          JOB_ID: ${{ github.event.client_payload.jobId }}
-          DEVICE_ID: ${{ github.event.client_payload.deviceId }}
-          OVERLAY_TEXT: ${{ github.event.client_payload.overlayText }}
         run: |
+          JOB_ID="${{ steps.payload.outputs.jobId }}"
+          DEVICE_ID="${{ steps.payload.outputs.deviceId }}"
+          OVERLAY_TEXT="${{ steps.payload.outputs.text }}"
           mkdir -p api/status
 
           cat > api/status/${JOB_ID}.json << EOF
@@ -148,15 +137,13 @@ jobs:
           git add api/status/
           git diff --staged --quiet || git commit -m "video-job: ${JOB_ID}"
           git push
-          echo "Status written for job: ${JOB_ID}"
 
-      - name: Mark job failed on error
+      - name: Mark failed on error
         if: failure()
-        env:
-          JOB_ID: ${{ github.event.client_payload.jobId }}
         run: |
+          JOB_ID="${{ steps.payload.outputs.jobId }}"
           mkdir -p api/status
-          echo "{\"status\":\"error\",\"jobId\":\"${JOB_ID}\",\"error\":\"Video render failed. Check Actions logs.\",\"results\":[],\"done\":0,\"total\":1}" > api/status/${JOB_ID}.json
+          echo "{\"status\":\"error\",\"jobId\":\"${JOB_ID}\",\"error\":\"Video render failed.\",\"results\":[],\"done\":0,\"total\":1}" > api/status/${JOB_ID}.json
           git config user.name  "LUMA Bot"
           git config user.email "luma-bot@users.noreply.github.com"
           git add api/status/
