@@ -304,11 +304,11 @@ html,body{height:100%;overflow:hidden;overscroll-behavior:none;background:var(--
 /* ══════════════════════════════════════════════════════
    CONFIG — set your GitHub repo details here
 ══════════════════════════════════════════════════════ */
-const GH_OWNER = 'YOUR_GITHUB_USERNAME';   // e.g. 'Vahjnjii'
-const GH_REPO  = 'YOUR_REPO_NAME';         // e.g. 'luma'
-const GH_PAT   = 'YOUR_GH_PAT_TOKEN';      // Personal Access Token (repo scope)
+const GH_OWNER   = 'Vahjnjii';
+const GH_REPO    = 'luma';
+const GH_ISSUE   = 1; // Issue number used as job trigger — create issue #1 manually in repo
 // Raw content base URL — used to poll job status
-const RAW_BASE = `https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/main/api/status`;
+const RAW_BASE   = `https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/main/api/status`;
 
 /* ══════════════════════════════════════════════════════
    STATE
@@ -362,23 +362,27 @@ document.addEventListener('click', e => {
 });
 
 /* ══════════════════════════════════════════════════════
-   GITHUB ACTIONS TRIGGER
+   GITHUB ACTIONS TRIGGER — via Issue Comment (no token needed)
+   Browser posts a comment to a public issue.
+   GitHub Actions listens on issue_comment event and processes it.
+   GH_PAT stays safely inside GitHub Secrets only.
 ══════════════════════════════════════════════════════ */
 async function triggerGitHub(eventType, payload) {
-  const res = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/dispatches`, {
+  const prefix = eventType === 'render-video' ? 'LUMA_VID' : 'LUMA_IMG';
+  const body   = prefix + ':' + JSON.stringify(payload);
+  const res = await fetch('https://api.github.com/repos/' + GH_OWNER + '/' + GH_REPO + '/issues/' + GH_ISSUE + '/comments', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${GH_PAT}`,
       'Accept': 'application/vnd.github+json',
       'Content-Type': 'application/json',
       'User-Agent': 'LUMA-App',
       'X-GitHub-Api-Version': '2022-11-28'
     },
-    body: JSON.stringify({ event_type: eventType, client_payload: payload })
+    body: JSON.stringify({ body })
   });
   if (!res.ok) {
     const t = await res.text();
-    throw new Error(`GitHub ${res.status}: ${t.slice(0,200)}`);
+    throw new Error('GitHub ' + res.status + ': ' + t.slice(0,200));
   }
 }
 
