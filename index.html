@@ -105,94 +105,99 @@ html,body{height:100%;overflow:hidden;overscroll-behavior:none;background:var(--
 .ch-group-hd{display:flex;align-items:center;justify-content:space-between;gap:8px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:8px 12px;font-size:12px;color:var(--mu);flex-wrap:wrap;}
 .ch-group-hd-left{display:flex;align-items:center;gap:8px;flex-shrink:0}
 .ch-dl-all-btn{display:flex;align-items:center;justify-content:center;gap:7px;background:linear-gradient(135deg,rgba(99,102,241,.22),rgba(139,92,246,.16));border:1px solid rgba(139,92,246,.32);border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;color:rgba(167,139,250,.95);cursor:pointer;font-family:inherit;transition:all .2s;white-space:nowrap;}
-.ch-dl-all-btn:hover{background:linear-gradient(135deg,rgba(99,102,241,.35),rgba(139,92,246,.28))}
-.ch-dl-all-btn:disabled{opacity:.5;cursor:wait}
-.ch-img-row{display:flex;flex-wrap:nowrap;gap:10px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;padding-bottom:6px;width:100%;scroll-snap-type:x mandatory;}
-.ch-img-row::-webkit-scrollbar{height:3px}
-.ch-img-row::-webkit-scrollbar-thumb{background:#1e1b2e;border-radius:3px}
-.ch-img-card{flex-shrink:0;width:160px;border-radius:14px;overflow:hidden;background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);animation:fadeUp .3s ease both;transition:border-color .25s;scroll-snap-align:start;position:relative;}
-.ch-img-card:hover{border-color:rgba(255,255,255,.16)}
-.ch-img-wrap{width:100%;aspect-ratio:9/16;overflow:hidden;background:#000;cursor:pointer;position:relative}
-.ch-img-wrap img{width:100%;height:100%;object-fit:cover;display:block;transition:opacity .3s}
-.ch-img-wrap.loading img{opacity:0}
-.ch-img-actions{padding:8px;display:flex;flex-direction:column;gap:5px}
-.ch-img-btn-share{width:100%;display:flex;align-items:center;justify-content:center;gap:7px;background:linear-gradient(135deg,rgba(34,197,94,.16),rgba(34,197,94,.09));border:1px solid rgba(34,197,94,.28);border-radius:9px;padding:10px 8px;font-size:12px;font-weight:700;color:rgba(134,239,172,.95);cursor:pointer;font-family:inherit;transition:all .18s;}
-.ch-img-btn-share:hover{background:linear-gradient(135deg,rgba(34,197,94,.26),rgba(34,197,94,.18))}
-.ch-img-btn-share.saving{opacity:.5;cursor:wait}
-.ch-img-btns-row{display:flex;gap:5px}
-.ch-img-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:4px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);border-radius:7px;padding:7px 4px;font-size:10px;font-weight:600;color:var(--mu);cursor:pointer;font-family:inherit;transition:all .18s;}
-.ch-img-btn:hover{background:rgba(255,255,255,.1);color:#fff}
-.ch-img-btn.saving{opacity:.5;cursor:wait}
-.ch-error{align-self:flex-start;max-width:85%;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.18);border-radius:12px;padding:10px 14px;font-size:13px;color:#fca5a5;line-height:1.6;animation:fadeUp .25s ease both}
-.ch-session-label{align-self:center;font-size:11px;font-weight:600;color:var(--mu2);background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);border-radius:20px;padding:4px 12px}
-.ch-input-wrap{flex-shrink:0}
-#vid-duration-row{display:none;padding:0 12px 6px;max-width:480px;margin:0 auto;width:100%}
-.ch-input-bar{flex-shrink:0;padding:10px 12px;padding-bottom:calc(10px + env(safe-area-inset-bottom));border-top:1px solid rgba(255,255,255,.05);background:rgba(5,5,8,.97);backdrop-filter:blur(16px);display:flex;align-items:flex-end;gap:9px;z-index:20;}
-.ch-textarea{flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:16px;padding:11px 14px;color:#fff;font-size:16px;font-family:inherit;resize:none;outline:none;min-height:46px;max-height:140px;line-height:1.55;transition:border-color .2s;}
-.ch-textarea:focus{border-color:rgba(99,102,241,.38)}
-.ch-textarea::placeholder{color:rgba(255,255,255,.22)}
-.ch-send{width:46px;height:46px;flex-shrink:0;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;box-shadow:0 4px 16px rgba(99,102,241,.32);}
-.ch-send:hover:not(:disabled){transform:scale(1.07)}
-.ch-send:disabled{opacity:.38;cursor:not-allowed;transform:none}
+.ch-dl-all-btn:hover{transform:translateY(-1px);background:linear-gradient(135deg,rgba(99,102,241,.3),rgba(139,92,246,.22))}
+.ch-dl-all-btn:active{transform:scale(.96)}
+.ch-img-row{display:flex;flex-direction:column;gap:8px}
+.ch-img-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:12px;animation:fadeUp .3s cubic-bezier(.16,1,.3,1) both;cursor:pointer;transition:all .22s}
+.ch-img-card:hover{background:rgba(255,255,255,.05);border-color:rgba(139,92,246,.2)}
+.ch-img-card-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.ch-img-card-title{font-size:13px;font-weight:700;color:rgba(255,255,255,.75);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ch-img-card-dl{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.25);color:rgba(167,139,250,.9);font-size:11px;cursor:pointer;transition:all .2s;flex-shrink:0}
+.ch-img-card-dl:hover{background:rgba(99,102,241,.25);transform:translateY(-1px)}
+.ch-img-canvas{width:100%;aspect-ratio:9/16;border-radius:10px;background:#000;cursor:pointer}
+.ch-error{align-self:flex-start;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.15);border-radius:12px;padding:10px 14px;font-size:13px;color:#fca5a5;display:flex;align-items:center;gap:8px;animation:fadeUp .25s ease both}
+.ch-input-bar{flex-shrink:0;display:flex;align-items:flex-end;gap:8px;padding:10px 12px;padding-bottom:calc(10px + env(safe-area-inset-bottom));background:rgba(5,5,8,.97);backdrop-filter:blur(16px);border-top:1px solid rgba(255,255,255,.05);}
+.ch-textarea{flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:11px 15px;color:#fff;font-size:14px;font-family:inherit;outline:none;resize:none;transition:border-color .2s;max-height:140px;overflow-y:auto;}
+.ch-textarea:focus{border-color:rgba(99,102,241,.4)}
+.ch-textarea::placeholder{color:rgba(255,255,255,.25)}
+.ch-send{width:40px;height:40px;flex-shrink:0;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;color:#fff;font-size:15px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 18px rgba(99,102,241,.4)}
+.ch-send:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(99,102,241,.5)}
+.ch-send:active{transform:scale(.94)}
+.ch-send:disabled{opacity:.5;cursor:wait;transform:none}
+.ch-vid-group{align-self:flex-start;width:100%;display:flex;flex-direction:column;gap:8px}
+.ch-vid-status{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--mu)}
+.ch-vid-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:12px;animation:fadeUp .3s cubic-bezier(.16,1,.3,1) both}
+.ch-vid-card video{width:100%;aspect-ratio:9/16;border-radius:10px;background:#000;object-fit:cover}
+.ch-vid-actions{display:flex;gap:6px;margin-top:10px}
+.ch-vid-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:linear-gradient(135deg,rgba(99,102,241,.2),rgba(139,92,246,.15));border:1px solid rgba(139,92,246,.28);border-radius:8px;padding:8px 12px;font-size:12px;font-weight:600;color:rgba(167,139,250,.9);cursor:pointer;font-family:inherit;transition:all .2s}
+.ch-vid-btn:hover{background:linear-gradient(135deg,rgba(99,102,241,.28),rgba(139,92,246,.2));transform:translateY(-1px)}
+.ch-vid-btn:active{transform:scale(.96)}
+.ch-session-label{align-self:center;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.16);padding:6px 0;margin:8px 0}
 
 /* ═══ HISTORY ═══ */
-.hist-panel{position:fixed;inset:0;z-index:400;display:none}
-.hist-panel.open{display:flex}
-.hist-back{position:absolute;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(4px)}
-.hist-drawer{position:absolute;right:0;top:0;bottom:0;width:min(340px,100vw);background:#09081a;border-left:1px solid rgba(255,255,255,.07);display:flex;flex-direction:column;animation:slideIn .28s cubic-bezier(.16,1,.3,1) both}
-.hist-head{padding:16px 18px;padding-top:calc(16px + env(safe-area-inset-top));border-bottom:1px solid rgba(255,255,255,.05);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-.hist-head-txt{font-size:15px;font-weight:800}
-.hist-sub{font-size:11px;color:var(--mu);margin-top:2px}
-.hist-close{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.05);border:none;color:var(--mu);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .18s}
-.hist-close:hover{background:rgba(239,68,68,.12);color:#fca5a5}
-.hist-list{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px}
-.hist-item{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:13px 14px;margin-bottom:8px;cursor:pointer;transition:all .18s;position:relative;animation:fadeUp .25s ease both}
-.hist-item:hover{border-color:rgba(255,255,255,.12);background:rgba(255,255,255,.05)}
-.hist-item-top{display:flex;align-items:center;gap:8px;margin-bottom:5px}
-.hist-badge{background:rgba(99,102,241,.2);border:1px solid rgba(99,102,241,.25);color:rgba(167,139,250,.9);font-size:9px;font-weight:800;padding:2px 7px;border-radius:20px;letter-spacing:.06em;flex-shrink:0}
-.hist-label{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hist-meta{font-size:11px;color:var(--mu)}
-.hist-del{position:absolute;top:10px;right:10px;background:none;border:none;color:rgba(255,255,255,.14);font-size:12px;cursor:pointer;padding:4px;transition:color .15s}
-.hist-del:hover{color:#fca5a5}
-.hist-empty{text-align:center;padding:40px 20px;color:rgba(255,255,255,.2);font-size:13px;line-height:1.8}
+.hist-panel{position:fixed;inset:0;z-index:100;display:none;pointer-events:none}
+.hist-panel.open{display:block;pointer-events:auto}
+.hist-back{position:absolute;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);animation:fadeUp .2s ease both}
+.hist-drawer{position:fixed;right:0;top:0;bottom:0;width:min(90%,400px);background:#0a0914;border-left:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;animation:slideIn .3s cubic-bezier(.16,1,.3,1) both;box-shadow:-8px 0 40px rgba(0,0,0,.6)}
+.hist-head{display:flex;align-items:flex-start;justify-content:space-between;padding:20px 18px;border-bottom:1px solid rgba(255,255,255,.06);gap:10px;flex-shrink:0}
+.hist-head-txt{font-size:18px;font-weight:800;letter-spacing:-.3px;color:#fff}
+.hist-sub{font-size:11px;color:var(--mu);margin-top:3px}
+.hist-close{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);color:var(--mu);font-size:14px;cursor:pointer;transition:all .2s;flex-shrink:0}
+.hist-close:hover{background:rgba(255,255,255,.09);color:#fff}
+.hist-list{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px}
+.hist-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--mu);text-align:center;padding:40px 20px}
+.hist-empty-icon{font-size:40px;opacity:.3}
+.hist-empty-txt{font-size:14px}
+.hist-item{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:12px 14px;cursor:pointer;transition:all .2s;position:relative}
+.hist-item:hover{background:rgba(255,255,255,.05);border-color:rgba(139,92,246,.2)}
+.hist-item-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+.hist-item-date{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.22)}
+.hist-item-del{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;background:transparent;border:1px solid transparent;color:rgba(255,255,255,.2);font-size:10px;cursor:pointer;transition:all .2s}
+.hist-item-del:hover{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.2);color:#fca5a5}
+.hist-item-label{font-size:13px;font-weight:600;color:rgba(255,255,255,.7);line-height:1.5;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hist-item-status{font-size:11px;color:var(--mu);margin-top:4px}
+.hist-item-status.done{color:var(--gn)}
+.hist-item-status.error{color:var(--rd)}
 
 /* ═══ TOAST ═══ */
-.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:600;background:rgba(14,12,26,.97);backdrop-filter:blur(12px);color:#fff;padding:10px 20px;border-radius:50px;border:1px solid rgba(255,255,255,.12);box-shadow:0 8px 32px rgba(0,0,0,.6);display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;white-space:nowrap;animation:fadeUp .22s ease both;pointer-events:none;}
+.toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:200;background:#0d0c1a;border:1px solid rgba(99,102,241,.25);border-radius:12px;padding:10px 16px;font-size:13px;font-weight:600;color:#fff;display:none;align-items:center;gap:8px;box-shadow:0 8px 32px rgba(0,0,0,.7);animation:fadeUp .2s ease both;max-width:calc(100vw - 40px)}
 </style>
 </head>
 <body>
 
-<!-- ══ LOGIN ══ -->
+<!-- ══ LOGIN SCREEN ══ -->
 <div id="screen-login" class="screen active">
-  <div class="orb orb-1"></div><div class="orb orb-2"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
   <div class="login-card">
     <div class="logo-mark">L</div>
     <div class="login-brand">LUMA</div>
-    <div class="login-tag">AI-Powered Content Generator</div>
+    <div class="login-tag">AI Content Generator</div>
     <div class="login-form">
-      <input id="login-name" class="login-input" type="text" placeholder="Your name" autocomplete="off">
-      <div id="login-error" class="login-error"></div>
-      <button class="login-btn" onclick="doLogin()">
-        <i class="fas fa-bolt" style="margin-right:7px"></i> Get Started — Free
-      </button>
+      <input id="login-name" class="login-input" type="text" placeholder="Enter your name" autocomplete="name">
+      <button class="login-btn" onclick="doLogin()">Continue</button>
     </div>
-    <p class="login-note">🔒 No account needed. Your data stays in your browser.</p>
+    <div id="login-error" class="login-error"></div>
+    <div class="login-note">
+      Your data stays local. We use GitHub Actions for AI generation.
+      <br>You'll need to configure your GitHub token in the code.
+    </div>
   </div>
 </div>
 
-<!-- ══ TEMPLATES ══ -->
+<!-- ══ TEMPLATES SCREEN ══ -->
 <div id="screen-templates" class="screen">
   <div class="t-nav">
     <div class="t-logo">LUMA</div>
     <div class="user-chip" onclick="toggleSignOut()">
-      <i class="fas fa-user" style="font-size:11px"></i>
+      <i class="fas fa-user" style="font-size:10px"></i>
       <span id="un-tmpl"></span>
-      <i class="fas fa-chevron-down" style="font-size:9px;color:var(--mu)"></i>
+      <i class="fas fa-chevron-down" style="font-size:9px;margin-left:-2px"></i>
     </div>
   </div>
   <div class="t-body">
-    <div class="t-greeting" id="t-greeting">Hey there 👋</div>
-    <div class="t-hint">Pick a template to get started</div>
+    <div id="t-greeting" class="t-greeting">Welcome 👋</div>
+    <div class="t-hint">Pick a generator to start creating</div>
 
     <div class="t-card" onclick="openTemplate('imggen')">
       <div class="t-card-glow"></div>
@@ -258,7 +263,7 @@ html,body{height:100%;overflow:hidden;overscroll-behavior:none;background:var(--
   </div>
 
   <!-- Duration row for video mode -->
-  <div id="vid-duration-row">
+  <div id="vid-duration-row" style="display:none">
     <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:8px 14px;margin:0 12px 6px">
       <i class="fas fa-clock" style="color:rgba(255,255,255,.4);font-size:12px"></i>
       <span style="font-size:12px;color:rgba(255,255,255,.5);white-space:nowrap">Duration</span>
@@ -302,11 +307,18 @@ html,body{height:100%;overflow:hidden;overscroll-behavior:none;background:var(--
 <script>'use strict';
 
 /* ══════════════════════════════════════════════════════
-   CONFIG — set your GitHub repo details here
+   CONFIG — IMPORTANT: Set your GitHub credentials here!
 ══════════════════════════════════════════════════════ */
-const GH_OWNER   = 'Vahjnjii';
-const GH_REPO    = 'luma';
-const GH_ISSUE   = 1; // Issue number used as job trigger — create issue #1 manually in repo
+const GH_OWNER   = 'Vahjnjii';  // Your GitHub username
+const GH_REPO    = 'luma';      // Your repository name
+const GH_ISSUE   = 1;           // Issue number (create issue #1 in your repo)
+
+// ⚠️ SECURITY WARNING: For production, use a backend proxy instead!
+// This token will be visible in the browser. Only use a token with minimal permissions.
+// Required permissions: public_repo (or repo scope if private)
+// Create token at: https://github.com/settings/tokens
+const GH_TOKEN   = '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';  // ← GitHub Personal Access Token
+
 // Raw content base URL — used to poll job status
 const RAW_BASE   = `https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/main/api/status`;
 
@@ -338,6 +350,40 @@ function doLogin() {
 }
 
 function enterApp() {
+  // Check if GitHub token is configured
+  if (!GH_TOKEN || GH_TOKEN === '') {
+    const errEl = el('login-error');
+    errEl.innerHTML = '<strong>Setup Required:</strong> Please configure your GitHub Personal Access Token in the code (line ~332). See console for instructions.';
+    errEl.style.display = 'block';
+    console.error(`
+═══════════════════════════════════════════════════════════
+  GITHUB TOKEN SETUP REQUIRED
+═══════════════════════════════════════════════════════════
+
+To use LUMA, you need to create a GitHub Personal Access Token:
+
+1. Go to: https://github.com/settings/tokens
+2. Click "Generate new token (classic)"
+3. Give it a name: "LUMA App"
+4. Select scopes:
+   - For public repos: Check "public_repo"
+   - For private repos: Check "repo" (full control)
+5. Click "Generate token"
+6. Copy the token (starts with ghp_...)
+7. Open this HTML file in a text editor
+8. Find line ~332: const GH_TOKEN = '';
+9. Paste your token between the quotes: const GH_TOKEN = 'ghp_your_token_here';
+10. Save and reload this page
+
+⚠️ SECURITY WARNING:
+This token will be visible in the browser's source code.
+For production use, implement a backend proxy server instead.
+
+═══════════════════════════════════════════════════════════
+    `);
+    return;
+  }
+
   const name = _currentUser.name.split(' ')[0];
   el('un-tmpl').textContent = name;
   el('so-name').textContent  = _currentUser.name;
@@ -362,27 +408,43 @@ document.addEventListener('click', e => {
 });
 
 /* ══════════════════════════════════════════════════════
-   GITHUB ACTIONS TRIGGER — via Issue Comment (no token needed)
-   Browser posts a comment to a public issue.
-   GitHub Actions listens on issue_comment event and processes it.
-   GH_PAT stays safely inside GitHub Secrets only.
+   GITHUB ACTIONS TRIGGER — with proper authentication
 ══════════════════════════════════════════════════════ */
 async function triggerGitHub(eventType, payload) {
   const prefix = eventType === 'render-video' ? 'LUMA_VID' : 'LUMA_IMG';
   const body   = prefix + ':' + JSON.stringify(payload);
+  
   const res = await fetch('https://api.github.com/repos/' + GH_OWNER + '/' + GH_REPO + '/issues/' + GH_ISSUE + '/comments', {
     method: 'POST',
     headers: {
       'Accept': 'application/vnd.github+json',
+      'Authorization': 'Bearer ' + GH_TOKEN,  // ← FIXED: Added authentication
       'Content-Type': 'application/json',
       'User-Agent': 'LUMA-App',
       'X-GitHub-Api-Version': '2022-11-28'
     },
     body: JSON.stringify({ body })
   });
+  
   if (!res.ok) {
-    const t = await res.text();
-    throw new Error('GitHub ' + res.status + ': ' + t.slice(0,200));
+    const errorText = await res.text();
+    let errorMsg = 'GitHub API error';
+    
+    try {
+      const errorJson = JSON.parse(errorText);
+      errorMsg = errorJson.message || errorText.slice(0, 200);
+    } catch {
+      errorMsg = errorText.slice(0, 200);
+    }
+    
+    // Provide helpful error messages
+    if (res.status === 401) {
+      throw new Error('Authentication failed. Please check your GitHub token is valid and has the correct permissions.');
+    } else if (res.status === 404) {
+      throw new Error(`Repository or issue not found. Please verify:\n- Repository: ${GH_OWNER}/${GH_REPO}\n- Issue #${GH_ISSUE} exists`);
+    } else {
+      throw new Error(`GitHub ${res.status}: ${errorMsg}`);
+    }
   }
 }
 
@@ -598,212 +660,177 @@ function updateGroupHd(jobId, done, total, status) {
   }
 }
 
-function addImageCard(jobId, result, index) {
-  if (!_svgStore[jobId]) _svgStore[jobId] = [];
-  _svgStore[jobId][index] = result.svg;
-  if (!_titleStore[jobId]) _titleStore[jobId] = [];
-  if (result.title) _titleStore[jobId][index] = result.title;
-
-  const imgSrc = svgSrc(result.svg);
-  const jid    = escHtml(jobId);
-  const safeT  = escHtml(result.title || '');
-  const card   = document.createElement('div');
-  card.className = 'ch-img-card';
-  card.id        = `card-${jid}-${index}`;
-  card.style.animationDelay = (index % 6 * 60) + 'ms';
-  card.innerHTML = `
-    <div class="ch-img-wrap loading" id="wrap-${jid}-${index}">
-      <img src="${imgSrc}" alt="${safeT}" onload="el('wrap-${jid}-${index}')?.classList.remove('loading')">
-    </div>
-    <div class="ch-img-actions">
-      <button class="ch-img-btn-share" onclick="shareImage('${jid}',${index})">
-        <i class="fas fa-share-nodes"></i> Share
-      </button>
-      <div class="ch-img-btns-row">
-        <button class="ch-img-btn" onclick="dlImage('${jid}',${index})">
-          <i class="fas fa-download"></i> Save
-        </button>
-        <button class="ch-img-btn" onclick="copyTitle('${jid}',${index})">
-          <i class="fas fa-copy"></i> Copy
-        </button>
-      </div>
-    </div>`;
-  el(`row-${jobId}`)?.appendChild(card);
-}
-
-function addVideoGroup(jobId) {
-  const d = document.createElement('div');
-  d.className = 'ch-bot-group'; d.id = `grp-${escHtml(jobId)}`;
-  d.innerHTML = `
-    <div class="ch-group-hd" id="ghd-${escHtml(jobId)}">
-      <div class="ch-group-hd-left">
-        <div class="ch-dots"><span></span><span></span><span></span></div>
-        <span>Rendering on GitHub Actions… (~2 min)</span>
-      </div>
-    </div>
-    <div class="ch-img-row" id="row-${escHtml(jobId)}"></div>`;
-  msgs().appendChild(d);
-}
-
-function updateVideoGroup(jobId, job) {
-  const hd = el(`ghd-${jobId}`); if (!hd) return;
-  if (job.status === 'done') {
-    hd.innerHTML = `<div class="ch-group-hd-left"><i class="fas fa-check" style="color:var(--gn)"></i><span>Video ready!</span></div>`;
-  } else if (job.status === 'error') {
-    hd.innerHTML = `<div class="ch-group-hd-left"><i class="fas fa-triangle-exclamation" style="color:#ef4444"></i><span>Render failed</span></div>`;
-  }
-}
-
-function showVideoCard(jobId, videoUrl, label) {
+function addImageCard(jobId, item, idx) {
+  if (!item || !item.svg) return;
   const row = el(`row-${jobId}`); if (!row) return;
-  const jid = escHtml(jobId);
-  const card = document.createElement('div');
-  card.className = 'ch-img-card'; card.id = `vcard-${jid}`;
-  card.style.width = '200px';
-  card.innerHTML = `
-    <div style="position:relative;border-radius:12px;overflow:hidden;background:#000;aspect-ratio:9/16">
-      <video src="${escHtml(videoUrl)}" playsinline muted loop style="width:100%;height:100%;object-fit:cover" onloadeddata="this.play()"></video>
+  const key = jobId + ':' + idx;
+  if (!_svgStore[key]) _svgStore[key] = item.svg;
+
+  const d = document.createElement('div');
+  d.className = 'ch-img-card';
+  d.id = `card-${escHtml(key)}`;
+  d.innerHTML = `
+    <div class="ch-img-card-top">
+      <div class="ch-img-card-title">${escHtml(item.title||`Image ${idx+1}`)}</div>
+      <button class="ch-img-card-dl" onclick="downloadSingle('${escHtml(key)}')"><i class="fas fa-download"></i></button>
     </div>
-    <div class="ch-img-actions">
-      <button class="ch-img-btn-share" onclick="shareVideo('${escHtml(videoUrl)}','${escHtml(label)}')">
-        <i class="fas fa-share-nodes"></i> Share
-      </button>
-      <div class="ch-img-btns-row">
-        <button class="ch-img-btn" onclick="dlVideo('${escHtml(videoUrl)}','${escHtml(label)}')">
-          <i class="fas fa-download"></i> Save
-        </button>
-      </div>
-    </div>`;
-  row.appendChild(card);
-  scrollDown();
+    <canvas class="ch-img-canvas" id="cnv-${escHtml(key)}"></canvas>`;
+  row.appendChild(d);
+  drawCanvas(key);
+}
+
+function drawCanvas(key) {
+  requestAnimationFrame(() => {
+    const cnv = el('cnv-' + key);
+    if (!cnv || !_svgStore[key]) return;
+    const ctx = cnv.getContext('2d');
+    cnv.width = 1080; cnv.height = 1920;
+    const img = new Image();
+    img.onload = () => { ctx.drawImage(img, 0, 0, 1080, 1920); };
+    img.src = svgSrc(_svgStore[key]);
+  });
 }
 
 function addErrorBubble(msg) {
   const d = document.createElement('div');
   d.className = 'ch-error';
-  d.innerHTML = `<i class="fas fa-triangle-exclamation" style="margin-right:6px"></i>${escHtml(msg)}`;
+  d.innerHTML = `<i class="fas fa-triangle-exclamation"></i> ${escHtml(msg)}`;
   msgs().appendChild(d);
+  scrollDown();
+}
+
+function addVideoGroup(jobId) {
+  const d = document.createElement('div');
+  d.className = 'ch-vid-group'; d.id = `vgrp-${escHtml(jobId)}`;
+  d.innerHTML = `<div class="ch-vid-status" id="vstat-${escHtml(jobId)}">
+    <div class="ch-dots"><span></span><span></span><span></span></div>
+    <span>Waiting for GitHub Actions… (~60s)</span>
+  </div>`;
+  msgs().appendChild(d);
+}
+
+function updateVideoGroup(jobId, job) {
+  const stat = el(`vstat-${jobId}`); if (!stat) return;
+  if (job.status === 'processing') {
+    const sp = stat.querySelector('span');
+    if (sp) sp.textContent = job.progress || 'Processing video…';
+  }
+}
+
+function showVideoCard(jobId, videoUrl, label) {
+  const grp = el(`vgrp-${jobId}`); if (!grp) return;
+  const stat = el(`vstat-${jobId}`); if (stat) stat.remove();
+  const d = document.createElement('div');
+  d.className = 'ch-vid-card';
+  d.innerHTML = `
+    <video controls playsinline><source src="${escHtml(videoUrl)}" type="video/mp4"></video>
+    <div class="ch-vid-actions">
+      <button class="ch-vid-btn" onclick="window.open('${escHtml(videoUrl)}','_blank')">
+        <i class="fas fa-external-link-alt"></i> Open
+      </button>
+      <button class="ch-vid-btn" onclick="downloadVideo('${escHtml(videoUrl)}','${escHtml(label)}')">
+        <i class="fas fa-download"></i> Download
+      </button>
+    </div>`;
+  grp.appendChild(d);
+  scrollDown();
 }
 
 function addSessionLabel(ts) {
   const d = document.createElement('div');
   d.className = 'ch-session-label';
-  d.textContent = `Session · ${new Date(ts).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}`;
+  d.textContent = new Date(ts).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
   msgs().appendChild(d);
 }
 
 /* ══════════════════════════════════════════════════════
-   SHARE / DOWNLOAD
+   DOWNLOAD
 ══════════════════════════════════════════════════════ */
-function getTitle(jobId, index) {
-  return _titleStore[jobId]?.[index] || `Image ${index+1}`;
-}
-
-async function getPngBlob(jobId, index) {
-  const k = `${jobId}::${index}`;
-  if (_pngCache[k]) return _pngCache[k];
-  const svg = _svgStore[jobId]?.[index];
-  if (!svg) return null;
-  const blob = await svgToPng(svg);
-  if (blob) _pngCache[k] = blob;
-  return blob;
-}
-
-async function shareImage(jobId, index) {
-  const btn = el(`card-${jobId}-${index}`)?.querySelector('.ch-img-btn-share');
-  if (btn) { btn.classList.add('saving'); btn.innerHTML = '<i class="fas fa-circle-notch spin"></i> Sharing…'; }
-  try {
-    const blob  = await getPngBlob(jobId, index);
-    if (!blob) throw new Error('Image not ready yet');
-    const title = getTitle(jobId, index);
-    try { await navigator.clipboard.writeText(title); } catch {}
-    const file  = new File([blob], randName('png'), { type: 'image/png' });
-    if (navigator.share && navigator.canShare?.({ files: [file] })) {
-      await navigator.share({ files: [file], title, text: title });
-    } else { triggerDownload(blob, randName('png')); }
-    toast('Shared! ✓');
-  } catch(e) {
-    if (e.name !== 'AbortError') toast('⚠️ ' + e.message);
-  } finally {
-    if (btn) { btn.classList.remove('saving'); btn.innerHTML = '<i class="fas fa-share-nodes"></i> Share'; }
-  }
-}
-
-async function dlImage(jobId, index) {
-  const btn = el(`card-${jobId}-${index}`)?.querySelector('.ch-img-btn');
-  if (btn) { btn.classList.add('saving'); btn.innerHTML = '<i class="fas fa-circle-notch spin"></i>'; }
-  try {
-    const blob = await getPngBlob(jobId, index);
-    if (blob) { triggerDownload(blob, randName('png')); toast('Saved! ✓'); }
-  } catch(e) { toast('⚠️ ' + e.message); }
-  finally { if (btn) { btn.classList.remove('saving'); btn.innerHTML = '<i class="fas fa-download"></i> Save'; } }
+async function downloadSingle(key) {
+  const blob = await getPng(key);
+  if (!blob) return;
+  const [jobId, idx] = key.split(':');
+  const title = (_titleStore[jobId] && _titleStore[jobId][parseInt(idx,10)]) || `image_${parseInt(idx,10)+1}`;
+  triggerDownload(blob, `${title.replace(/[^a-z0-9]/gi,'_')}.png`);
+  toast('Image downloaded');
 }
 
 async function downloadAllImages(jobId, count) {
-  const btn = el(`dlall-${jobId}`);
-  if (btn) { btn.disabled=true; btn.innerHTML='<i class="fas fa-circle-notch spin"></i> Saving…'; }
-  for (let i=0; i<count; i++) {
-    try { const b = await getPngBlob(jobId,i); if(b){triggerDownload(b,randName('png'));await sleep(380);} } catch {}
+  const btn = el('dlall-' + jobId);
+  if (!btn) return;
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner spin"></i> Preparing…';
+  
+  const zip = new (await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm')).default();
+  for (let i = 0; i < count; i++) {
+    const key = jobId + ':' + i;
+    const blob = await getPng(key);
+    if (blob) {
+      const title = (_titleStore[jobId] && _titleStore[jobId][i]) || `image_${i+1}`;
+      zip.file(`${title.replace(/[^a-z0-9]/gi,'_')}.png`, blob);
+    }
   }
-  if (btn) { btn.disabled=false; btn.innerHTML=`<i class="fas fa-cloud-arrow-down"></i> Download All (${count})`; }
-  toast(`Downloaded ${count} images ✓`);
+  const zipBlob = await zip.generateAsync({ type: 'blob' });
+  triggerDownload(zipBlob, randName('zip'));
+  btn.disabled = false;
+  btn.innerHTML = '<i class="fas fa-cloud-arrow-down"></i> Download All (' + count + ')';
+  toast(`Downloaded ${count} images`);
 }
 
-async function copyTitle(jobId, index) {
-  try { await navigator.clipboard.writeText(getTitle(jobId, index)); } catch {}
-  toast('Copied ✓');
+async function getPng(key) {
+  if (_pngCache[key]) return _pngCache[key];
+  const svg = _svgStore[key]; if (!svg) return null;
+  const png = await svgToPng(svg);
+  if (png) _pngCache[key] = png;
+  return png;
 }
 
-async function shareVideo(url, label) {
-  try {
-    const resp = await fetch(url);
-    const blob = await resp.blob();
-    const file = new File([blob], randName('mp4'), { type: 'video/mp4' });
-    if (navigator.share && navigator.canShare?.({ files: [file] })) {
-      await navigator.share({ files: [file], title: label, text: label });
-    } else { triggerDownload(blob, randName('mp4')); }
-    toast('Shared! ✓');
-  } catch(e) { if (e.name !== 'AbortError') toast('⚠️ ' + e.message); }
-}
-
-async function dlVideo(url, label) {
-  try {
-    const resp = await fetch(url);
-    const blob = await resp.blob();
-    triggerDownload(blob, randName('mp4'));
-    toast('Video saved! ✓');
-  } catch(e) { toast('⚠️ ' + e.message); }
+function downloadVideo(url, label) {
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = (label || 'video').replace(/[^a-z0-9]/gi, '_') + '.mp4';
+  a.target = '_blank';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  toast('Video download started');
 }
 
 /* ══════════════════════════════════════════════════════
    HISTORY PANEL
 ══════════════════════════════════════════════════════ */
 function openHistory() {
-  el('hist-panel').classList.add('open');
   renderHistory(loadHistory());
+  el('hist-panel').classList.add('open');
 }
-function closeHistory() { el('hist-panel').classList.remove('open'); }
 
-function renderHistory(sessions) {
+function closeHistory() {
+  el('hist-panel').classList.remove('open');
+}
+
+function renderHistory(h) {
   const list = el('hist-list');
-  if (!sessions.length) {
-    list.innerHTML = '<div class="hist-empty">No history yet.<br>Sessions appear here after generating.</div>';
+  if (!h || h.length === 0) {
+    list.innerHTML = `
+      <div class="hist-empty">
+        <div class="hist-empty-icon">📭</div>
+        <div class="hist-empty-txt">No history yet</div>
+      </div>`;
     return;
   }
-  list.innerHTML = sessions.map(s => {
-    const date  = new Date(s.ts).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
-    const badge = s.template === 'vidgen' ? 'VID' : 'IMG';
-    const jid   = escHtml(s.jobId);
-    return `<div class="hist-item" onclick="loadSession('${jid}')">
-      <div class="hist-item-top">
-        <span class="hist-badge">${badge}</span>
-        <span class="hist-label">${escHtml(s.label||'Session')}</span>
-      </div>
-      <div style="display:flex;align-items:center;justify-content:space-between">
-        <div class="hist-meta">${date} · ${s.status||'done'}</div>
-        <button class="hist-del" onclick="delSession(event,'${jid}')"><i class="fas fa-xmark"></i></button>
-      </div>
-    </div>`;
+  list.innerHTML = h.map(e => {
+    const date = new Date(e.ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const statusClass = e.status === 'done' ? 'done' : e.status === 'error' ? 'error' : '';
+    const statusText  = e.status === 'done' ? 'Complete' : e.status === 'error' ? 'Failed' : 'In progress';
+    return `
+      <div class="hist-item" onclick="loadSession('${escHtml(e.jobId)}')">
+        <div class="hist-item-top">
+          <div class="hist-item-date">${date}</div>
+          <button class="hist-item-del" onclick="delSession(event,'${escHtml(e.jobId)}')"><i class="fas fa-trash-can"></i></button>
+        </div>
+        <div class="hist-item-label">${escHtml(e.label)}</div>
+        <div class="hist-item-status ${statusClass}">${statusText}</div>
+      </div>`;
   }).join('');
 }
 
