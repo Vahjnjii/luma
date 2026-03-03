@@ -47,7 +47,7 @@ html,body{height:100%;overflow:hidden;overscroll-behavior:none;background:var(--
 .login-btn:active{transform:scale(.97)}
 .login-btn:disabled{opacity:.5;cursor:wait;transform:none}
 .login-note{font-size:11px;color:rgba(255,255,255,.18);margin-top:16px;line-height:1.8}
-.login-error{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:10px;padding:10px 14px;font-size:12px;color:#fca5a5;display:none;}
+.login-error{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:10px;padding:10px 14px;font-size:12px;color:#fca5a5;display:none;margin-top:10px;}
 
 /* ═══ TEMPLATES ═══ */
 #screen-templates{flex-direction:column;background:#050508;overflow-y:auto;}
@@ -175,12 +175,13 @@ html,body{height:100%;overflow:hidden;overscroll-behavior:none;background:var(--
     <div class="login-tag">AI Content Generator</div>
     <div class="login-form">
       <input id="login-name" class="login-input" type="text" placeholder="Enter your name" autocomplete="name">
+      <input id="login-token" class="login-input" type="password" placeholder="Paste GitHub Token (ghp_...)" autocomplete="off">
       <button class="login-btn" onclick="doLogin()">Continue</button>
     </div>
     <div id="login-error" class="login-error"></div>
     <div class="login-note">
       Your data stays local. We use GitHub Actions for AI generation.
-      <br>You'll need to configure your GitHub token in the code.
+      <br>Your token is saved to your browser, not the code.
     </div>
   </div>
 </div>
@@ -307,17 +308,13 @@ html,body{height:100%;overflow:hidden;overscroll-behavior:none;background:var(--
 <script>'use strict';
 
 /* ══════════════════════════════════════════════════════
-   CONFIG — IMPORTANT: Set your GitHub credentials here!
+   CONFIG
 ══════════════════════════════════════════════════════ */
 const GH_OWNER   = 'Vahjnjii';  // Your GitHub username
 const GH_REPO    = 'luma';      // Your repository name
-const GH_ISSUE   = 1;           // Issue number (create issue #1 in your repo)
+const GH_ISSUE   = 1;           // Issue number
 
-// ⚠️ SECURITY WARNING: For production, use a backend proxy instead!
-// This token will be visible in the browser. Only use a token with minimal permissions.
-// Required permissions: public_repo (or repo scope if private)
-// Create token at: https://github.com/settings/tokens
-const GH_TOKEN   = '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';  // ← GitHub Personal Access Token
+let GH_TOKEN     = '';          // Loaded from LocalStorage
 
 // Raw content base URL — used to poll job status
 const RAW_BASE   = `https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/main/api/status`;
@@ -333,54 +330,48 @@ const _svgStore      = {};
 const _titleStore    = {};
 const _pngCache      = {};
 const LS_USER        = 'luma_user';
+const LS_TOKEN       = 'luma_gh_token';
 const LS_HISTORY     = 'luma_history';
 
 /* ══════════════════════════════════════════════════════
-   LOGIN — simple name-based, no Google needed
+   LOGIN — simple name-based + Token input
 ══════════════════════════════════════════════════════ */
 function doLogin() {
   const name = el('login-name').value.trim();
+  const token = el('login-token').value.trim();
   const errEl = el('login-error');
-  if (!name) { errEl.textContent = 'Please enter your name'; errEl.style.display='block'; return; }
+  
+  if (!name) { 
+    errEl.textContent = 'Please enter your name'; 
+    errEl.style.display='block'; 
+    return; 
+  }
+  
+  if (!token || !token.startsWith('ghp_')) {
+    errEl.textContent = 'Please enter a valid GitHub token (starts with ghp_)'; 
+    errEl.style.display='block'; 
+    return; 
+  }
+
   errEl.style.display = 'none';
+  
+  // Save credentials
   const user = { name, id: 'u_' + Math.random().toString(36).slice(2,10), ts: Date.now() };
   localStorage.setItem(LS_USER, JSON.stringify(user));
+  localStorage.setItem(LS_TOKEN, token);
+  
   _currentUser = user;
+  GH_TOKEN = token;
+  
   enterApp();
 }
 
 function enterApp() {
-  // Check if GitHub token is configured
-  if (!GH_TOKEN || GH_TOKEN === '') {
-    const errEl = el('login-error');
-    errEl.innerHTML = '<strong>Setup Required:</strong> Please configure your GitHub Personal Access Token in the code (line ~332). See console for instructions.';
-    errEl.style.display = 'block';
-    console.error(`
-═══════════════════════════════════════════════════════════
-  GITHUB TOKEN SETUP REQUIRED
-═══════════════════════════════════════════════════════════
-
-To use LUMA, you need to create a GitHub Personal Access Token:
-
-1. Go to: https://github.com/settings/tokens
-2. Click "Generate new token (classic)"
-3. Give it a name: "LUMA App"
-4. Select scopes:
-   - For public repos: Check "public_repo"
-   - For private repos: Check "repo" (full control)
-5. Click "Generate token"
-6. Copy the token (starts with ghp_...)
-7. Open this HTML file in a text editor
-8. Find line ~332: const GH_TOKEN = '';
-9. Paste your token between the quotes: const GH_TOKEN = 'ghp_your_token_here';
-10. Save and reload this page
-
-⚠️ SECURITY WARNING:
-This token will be visible in the browser's source code.
-For production use, implement a backend proxy server instead.
-
-═══════════════════════════════════════════════════════════
-    `);
+  // Verify token is loaded
+  GH_TOKEN = localStorage.getItem(LS_TOKEN);
+  
+  if (!GH_TOKEN) {
+    show('login');
     return;
   }
 
@@ -394,7 +385,11 @@ For production use, implement a backend proxy server instead.
 
 function signOut() {
   localStorage.removeItem(LS_USER);
+  localStorage.removeItem(LS_TOKEN);
   _currentUser = null;
+  GH_TOKEN = '';
+  el('login-name').value = '';
+  el('login-token').value = '';
   el('signout-menu').classList.remove('open');
   show('login');
 }
@@ -408,14 +403,13 @@ document.addEventListener('click', e => {
 });
 
 /* ══════════════════════════════════════════════════════
-   GITHUB ACTIONS TRIGGER — with proper authentication
+   GITHUB ACTIONS TRIGGER
 ══════════════════════════════════════════════════════ */
 async function triggerGitHub(eventType, payload) {
   const prefix = eventType === 'render-video' ? 'LUMA_VID' : 'LUMA_IMG';
   const body   = prefix + ':' + JSON.stringify(payload);
   
   // First, verify the token works by checking authentication
-  console.log('Testing GitHub authentication...');
   const authTest = await fetch('https://api.github.com/user', {
     headers: {
       'Authorization': 'token ' + GH_TOKEN,
@@ -424,17 +418,17 @@ async function triggerGitHub(eventType, payload) {
   });
   
   if (!authTest.ok) {
-    console.error('Auth test failed:', authTest.status);
-    throw new Error(`Token authentication failed (${authTest.status}). Please check:\n1. Token is valid (not expired/revoked)\n2. Token has 'public_repo' or 'repo' scope\n3. No extra spaces in token string`);
+    if (authTest.status === 401) {
+       throw new Error(`Authentication failed (401). Your token is invalid or expired. Please Sign Out and enter a new token.`);
+    }
+    throw new Error(`GitHub Authentication failed: ${authTest.status}`);
   }
-  
-  console.log('Auth successful! Posting comment...');
   
   const res = await fetch('https://api.github.com/repos/' + GH_OWNER + '/' + GH_REPO + '/issues/' + GH_ISSUE + '/comments', {
     method: 'POST',
     headers: {
       'Accept': 'application/vnd.github+json',
-      'Authorization': 'token ' + GH_TOKEN,  // Changed from 'Bearer' to 'token'
+      'Authorization': 'token ' + GH_TOKEN, 
       'Content-Type': 'application/json',
       'User-Agent': 'LUMA-App',
       'X-GitHub-Api-Version': '2022-11-28'
@@ -449,29 +443,20 @@ async function triggerGitHub(eventType, payload) {
     try {
       const errorJson = JSON.parse(errorText);
       errorMsg = errorJson.message || errorText.slice(0, 200);
-      console.error('GitHub API Error:', errorJson);
     } catch {
       errorMsg = errorText.slice(0, 200);
-      console.error('GitHub API Error (raw):', errorText);
     }
     
-    // Provide helpful error messages
-    if (res.status === 401) {
-      throw new Error('Authentication failed. Please check your GitHub token is valid and has the correct permissions.');
-    } else if (res.status === 404) {
-      throw new Error(`Repository or issue not found. Please verify:\n- Repository: ${GH_OWNER}/${GH_REPO} exists\n- Issue #${GH_ISSUE} exists in that repo\n- Repository is public OR token has repo access`);
-    } else if (res.status === 403) {
-      throw new Error(`Permission denied (403). Please check:\n- Token has 'public_repo' scope\n- You have write access to ${GH_OWNER}/${GH_REPO}`);
+    if (res.status === 404) {
+      throw new Error(`Repository or Issue not found. Check if Issue #${GH_ISSUE} exists in ${GH_OWNER}/${GH_REPO}.`);
     } else {
-      throw new Error(`GitHub ${res.status}: ${errorMsg}`);
+      throw new Error(`GitHub Error ${res.status}: ${errorMsg}`);
     }
   }
-  
-  console.log('Comment posted successfully!');
 }
 
 /* ══════════════════════════════════════════════════════
-   JOB STATUS POLLING — via raw.githubusercontent.com
+   JOB STATUS POLLING
 ══════════════════════════════════════════════════════ */
 async function pollStatus(jobId) {
   // Add cache-busting timestamp so GitHub CDN doesn't serve stale file
@@ -482,7 +467,7 @@ async function pollStatus(jobId) {
 }
 
 /* ══════════════════════════════════════════════════════
-   LOCAL HISTORY — stored in localStorage
+   LOCAL HISTORY
 ══════════════════════════════════════════════════════ */
 function loadHistory() {
   try { return JSON.parse(localStorage.getItem(LS_HISTORY) || '[]'); } catch { return []; }
@@ -944,10 +929,16 @@ function toast(msg) {
    INIT
 ══════════════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
-  // Auto-login if user exists
+  // Check if user and token exist in storage
   try {
-    const saved = localStorage.getItem(LS_USER);
-    if (saved) { _currentUser = JSON.parse(saved); enterApp(); }
+    const savedUser = localStorage.getItem(LS_USER);
+    const savedToken = localStorage.getItem(LS_TOKEN);
+    
+    if (savedUser && savedToken) { 
+      _currentUser = JSON.parse(savedUser);
+      GH_TOKEN = savedToken;
+      enterApp(); 
+    }
   } catch {}
 
   // Textarea events
